@@ -541,38 +541,40 @@ trait MediaUploadTrait
             }
         }
 
-        // Remove associated metadata.
-        $this->doRemoveMetadata($filename, $path);
-
-        // Remove associated 2x, 3x and their .meta.yaml files.
-        $targetPath = rtrim(sprintf('%s/%s', $folder, $pathname), '/');
-        $dir = scandir($targetPath, SCANDIR_SORT_NONE);
-        if (false === $dir) {
-            throw new RuntimeException($this->translate('PLUGIN_ADMIN.FILE_COULD_NOT_BE_DELETED') . ': ' . $filename, 500);
-        }
-
-        /** @var UniformResourceLocator $locator */
-        $locator = $this->getGrav()['locator'];
-
-        $basename = $filesystem->basename($filename);
-        $fileParts = (array)$filesystem->pathinfo($filename);
-
-        foreach ($dir as $file) {
-            $preg_name = preg_quote($fileParts['filename'], '`');
-            $preg_ext = preg_quote($fileParts['extension'] ?? '.', '`');
-            $preg_filename = preg_quote($basename, '`');
-
-            if (preg_match("`({$preg_name}@\d+x\.{$preg_ext}(?:\.meta\.yaml)?$|{$preg_filename}\.meta\.yaml)$`", $file)) {
-                $testPath = $targetPath . '/' . $file;
-                if ($locator->isStream($testPath)) {
-                    $testPath = (string)$locator->findResource($testPath, true, true);
-                    $locator->clearCache($testPath);
-                }
-
-                if (is_file($testPath)) {
-                    $result = unlink($testPath);
-                    if (!$result) {
-                        throw new RuntimeException($this->translate('PLUGIN_ADMIN.FILE_COULD_NOT_BE_DELETED') . ': ' . $filename, 500);
+        if ($this->getConfig()->get('system.media.auto_delete_metadata')) {
+            // Remove associated metadata.
+            $this->doRemoveMetadata($filename, $path);
+    
+            // Remove associated 2x, 3x and their .meta.yaml files.
+            $targetPath = rtrim(sprintf('%s/%s', $folder, $pathname), '/');
+            $dir = scandir($targetPath, SCANDIR_SORT_NONE);
+            if (false === $dir) {
+                throw new RuntimeException($this->translate('PLUGIN_ADMIN.FILE_COULD_NOT_BE_DELETED') . ': ' . $filename, 500);
+            }
+    
+            /** @var UniformResourceLocator $locator */
+            $locator = $this->getGrav()['locator'];
+    
+            $basename = $filesystem->basename($filename);
+            $fileParts = (array)$filesystem->pathinfo($filename);
+    
+            foreach ($dir as $file) {
+                $preg_name = preg_quote($fileParts['filename'], '`');
+                $preg_ext = preg_quote($fileParts['extension'] ?? '.', '`');
+                $preg_filename = preg_quote($basename, '`');
+    
+                if (preg_match("`({$preg_name}@\d+x\.{$preg_ext}(?:\.meta\.yaml)?$|{$preg_filename}\.meta\.yaml)$`", $file)) {
+                    $testPath = $targetPath . '/' . $file;
+                    if ($locator->isStream($testPath)) {
+                        $testPath = (string)$locator->findResource($testPath, true, true);
+                        $locator->clearCache($testPath);
+                    }
+    
+                    if (is_file($testPath)) {
+                        $result = unlink($testPath);
+                        if (!$result) {
+                            throw new RuntimeException($this->translate('PLUGIN_ADMIN.FILE_COULD_NOT_BE_DELETED') . ': ' . $filename, 500);
+                        }
                     }
                 }
             }
