@@ -1,3 +1,31 @@
+# v1.7.50.7
+## 11/05/2025
+
+1. [](#improved)
+    * Exclude dev files from exports
+    * Remove dev file in clean command
+1. [](#bugfix)
+    * Ignore .github and .phan folders during self-upgrade
+    * Fixed path check in self-upgrade
+
+# v1.7.50.6
+## 11/05/2025
+
+1. [](#bugfix)
+    * Fixed an issue where non-upgradable root-level folders were snapshotted
+
+# v1.7.50.5
+## 11/05/2025
+
+1. [](#new)
+    * Added new `bin/gpm preflight` command
+    * Added `--safe` and `--legacy` overrides for `bin/gpm self-upgrade` command
+1. [](#improved)
+    * Improved JS assets pipeline handling to support different loading strategies
+    * More safe-upgrade fixes around safe guarding `/user/` and maintaining permissions better
+1. [](#bugfix)
+   * Fixed a regex issue that corrupted safe-upgrade output
+
 # v1.7.50.4
 ## 10/31/2025
 
